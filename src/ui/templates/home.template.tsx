@@ -69,7 +69,7 @@ export function HomeTemplate() {
 	}
 
 	function handleOpenSheetLanguage() {
-		sheetLanguageSelectRef?.current?.close()
+		sheetLanguageSelectRef?.current?.expand()
 	}
 
 	const languagesName = {
@@ -88,44 +88,46 @@ export function HomeTemplate() {
 	}, [languageConfig.to])
 
 	return (
-		<View className="flex-1 p-4 gap-y-4">
-			<View className="bg-neutral-800 rounded-3xl min-h-[124px] p-4 justify-between">
-				<Typography.Title className="text-sm">{languagesName.from}</Typography.Title>
-				<TextInput
-					placeholder="Type something..."
-					value={toTranslateText}
-					onChangeText={(t) => {
-						setToTranslateText(t)
-						debounce(async () => await handleTranslate(t), 250)
-					}}
-					placeholderTextColor={colors.neutral[400]}
-					className="text-white text-lg font-subtitle my-4"
-					multiline
-				/>
-				<AudioButton
-					disabled={!translate}
-					onPress={() => handleListenPronunciation(toTranslateText, languageConfig.from)}
-					accessibilityLabel="Listen to pronunciation"
-					className="self-end"
-				/>
-			</View>
-			<View className="bg-neutral-800 rounded-3xl min-h-[124px] p-4 justify-between">
-				<Typography.Title className="text-sm text-emerald-300">{languagesName.to}</Typography.Title>
-				<TextInput
-					placeholder="Translation..."
-					readOnly
-					value={translateResult}
-					placeholderTextColor={colors.neutral[400]}
-					className="text-lg font-subtitle my-4 text-emerald-300"
-					multiline
-				/>
-				<AudioButton
-					disabled={!translate}
-					onPress={() => handleListenPronunciation(translateResult, languageConfig.to)}
-					accessibilityLabel="Listen to pronunciation"
-					className="self-end"
-				/>
-			</View>
+		<View className="flex-1 p-4 gap-y-4 justify-between">
+			<View className="gap-y-4">
+				<View className="bg-neutral-800 rounded-3xl min-h-[124px] p-4 justify-between">
+					<Typography.Title className="text-sm">{languagesName.from}</Typography.Title>
+					<TextInput
+						placeholder="Type something..."
+						value={toTranslateText}
+						onChangeText={(t) => {
+							setToTranslateText(t)
+							debounce(async () => await handleTranslate(t), 250)
+						}}
+						placeholderTextColor={colors.neutral[400]}
+						className="text-white text-lg font-subtitle my-4"
+						multiline
+					/>
+					<AudioButton
+						disabled={!translate}
+						onPress={() => handleListenPronunciation(toTranslateText, languageConfig.from)}
+						accessibilityLabel="Listen to pronunciation"
+						className="self-end"
+					/>
+				</View>
+					<View className="bg-neutral-800 rounded-3xl min-h-[124px] p-4 justify-between">
+						<Typography.Title className="text-sm text-emerald-300">{languagesName.to}</Typography.Title>
+						<TextInput
+							placeholder="Translation..."
+							readOnly
+							value={translateResult}
+							placeholderTextColor={colors.neutral[400]}
+							className="text-lg font-subtitle my-4 text-emerald-300"
+							multiline
+						/>
+						<AudioButton
+							disabled={!translate}
+							onPress={() => handleListenPronunciation(translateResult, languageConfig.to)}
+							accessibilityLabel="Listen to pronunciation"
+							className="self-end"
+						/>
+					</View>
+				</View>
 			<View className="flex-row w-full">
 				<LanguageSelect.Trigger
 					activeLanguage={languagesName.from}
