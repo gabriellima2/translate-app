@@ -1,5 +1,5 @@
 import * as Speech from 'expo-speech'
-import { SpeakAdapter } from "./speak.adapter"
+import { SpeakAdapter } from "../speak.adapter"
 
 class SpeakAdapterImpl implements SpeakAdapter {
 	execute(sentence: string, languageCode: string): void {
