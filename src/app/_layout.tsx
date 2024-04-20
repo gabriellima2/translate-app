@@ -1,32 +1,52 @@
-import { useEffect } from 'react';
-import { Stack, ErrorBoundary } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useFonts } from 'expo-font';
+import { useEffect } from 'react'
+import { SafeAreaView } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import * as SplashScreen from 'expo-splash-screen'
+import { Stack } from 'expo-router'
+import {
+  useFonts,
+  OpenSans_400Regular,
+  OpenSans_500Medium,
+  OpenSans_600SemiBold,
+} from '@expo-google-fonts/open-sans';
+
+import { STATUS_BAR_HEIGHT } from '@/constants/status-bar-height'
 
 export const unstable_settings = {
   initialRouteName: 'index',
-};
+}
 
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({});
+  let [loaded, error] = useFonts({
+    OpenSans_400Regular,
+    OpenSans_500Medium,
+    OpenSans_600SemiBold,
+  });
 
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    if (error) throw error
+  }, [error])
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync();
+      SplashScreen.hideAsync()
     }
-  }, [loaded]);
+  }, [loaded])
 
   if (!loaded)  return null
 
-  return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-    </Stack>
+	return (
+		<GestureHandlerRootView className='flex-1'>
+			<SafeAreaView
+				className="flex-1 bg-neutral-950"
+				style={{ paddingTop: Number(STATUS_BAR_HEIGHT ?? 44) }}
+			>
+				<Stack screenOptions={{ contentStyle: { flex: 1, backgroundColor: "transparent" }}}>
+					<Stack.Screen name="index" options={{ headerShown: false }} />
+				</Stack>
+			</SafeAreaView>
+		</GestureHandlerRootView>
   )
 }

@@ -7,11 +7,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        heading: '',
-        subtitle: '',
-				body: '',
-				thin: '',
-        bold: ''
+        heading: 'OpenSans_600SemiBold',
+        subtitle: 'OpenSans_500Medium',
+				body: 'OpenSans_400Regular',
       }
     },
   },
