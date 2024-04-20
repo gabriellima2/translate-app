@@ -1,7 +1,6 @@
 import { PropsWithChildren, forwardRef, useImperativeHandle } from 'react'
 import colors from 'tailwindcss/colors'
 import GorhomBottomSheet, {
-	BottomSheetScrollView,
 	BottomSheetProps as GorhomBottomSheetProps,
 } from '@gorhom/bottom-sheet'
 
@@ -31,21 +30,19 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
 
 		return (
 			<GorhomBottomSheet
-				{...props}
 				ref={bottomSheetRef}
 				detached
 				enablePanDownToClose
 				enableDynamicSizing
 				backdropComponent={BottomSheetOverlay}
-				backgroundStyle={{ backgroundColor: colors.white }}
+				backgroundStyle={{ backgroundColor: colors.neutral[800] }}
 				handleIndicatorStyle={{
 					marginTop: 4,
-					backgroundColor: colors.zinc[400],
+					backgroundColor: colors.neutral[500],
 				}}
+				{...props}
 			>
-				<BottomSheetScrollView contentContainerStyle={{ padding: 20 }}>
-					{children}
-				</BottomSheetScrollView>
+				{children}
 			</GorhomBottomSheet>
 		)
 	}
