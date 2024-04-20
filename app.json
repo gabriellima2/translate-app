@@ -22,7 +22,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.gabrielrsl.translateapp"
     },
     "web": {
       "bundler": "metro",
@@ -35,6 +36,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "927673d7-c91b-43b4-bdf9-83405e5f0c66"
+      }
     }
   }
 }
