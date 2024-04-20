@@ -17,50 +17,75 @@ import type { LanguageCode } from "@/@types/language-code";
 type TranslateType = 'from' | 'to'
 
 export function HomeTemplate() {
-	const [value, setValue] = useState('')
-	const [translated, setTranslated] = useState('')
-	const languageRef = useRef<BottomSheetRef>(null)
-	const [language, setLanguage] = useState<{ from: LanguageCode, to: LanguageCode }>({
+	const [toTranslateText, setToTranslateText] = useState('')
+	const [translateResult, setTranslateResult] = useState('')
+	const sheetLanguageSelectRef = useRef<BottomSheetRef>(null)
+	const [languageConfig, setLanguageConfig] = useState<{ from: LanguageCode, to: LanguageCode }>({
 		to: 'pt',
 		from: 'en'
 	})
 	const [action, setAction] = useState<TranslateType>('from')
 
-	async function handleTranslate(v: string) {
+	async function handleTranslate(text: string) {
 		try {
-			if (!v) return setTranslated('')
-			const result = await translate(v, { from: language.from, to: language.to })
-			setTranslated(result)
+			if (!text) return setTranslateResult('')
+			const result = await translate(text, { from: languageConfig.from, to: languageConfig.to })
+			setTranslateResult(result)
 		} catch (err) {
 			console.log(err)
 		}
 	}
 
-	function handleListen(sentence: string, language: string) {
-		if (!sentence) return
-		Speech.speak(sentence, { language })
+	function handleListenPronunciation(text: string, language: string) {
+		if (!text) return
+		Speech.speak(text, { language })
 	}
 
-	function handleAlternate() {
-		setLanguage((prevState) => ({ to: prevState.from, from: prevState.to }))
-		setTranslated(value)
-		setValue(translated)
+	function handleLanguageAlternate() {
+		setLanguageConfig((prevState) => ({ to: prevState.from, from: prevState.to }))
+		setTranslateResult(toTranslateText)
+		setToTranslateText(translateResult)
+	}
+
+	function handleSelectedLanguageChange(language: LanguageCode) {
+		const isAlreadySelectedLanguagesConfig =
+			language === languageConfig.from || language === languageConfig.to
+		if (isAlreadySelectedLanguagesConfig) {
+			handleCloseSheetLanguage()
+			return handleLanguageAlternate()
+		}
+		if (action === 'from') {
+			setToTranslateText('')
+			setLanguageConfig((prevState) => ({ ...prevState, from: language }))
+		}
+		if (action === 'to') {
+			setLanguageConfig((prevState) => ({ ...prevState, to: language }))
+		}
+		handleCloseSheetLanguage()
+	}
+
+	function handleCloseSheetLanguage() {
+		sheetLanguageSelectRef?.current?.close()
+	}
+
+	function handleOpenSheetLanguage() {
+		sheetLanguageSelectRef?.current?.close()
 	}
 
 	const languagesName = {
-		to: languages[language.to].name,
-		from: languages[language.from].name
+		to: languages[languageConfig.to].name,
+		from: languages[languageConfig.from].name
 	}
 
 	useEffect(() => {
-		if (value) return
-		setTranslated('')
-	}, [value])
+		if (toTranslateText) return
+		setTranslateResult('')
+	}, [toTranslateText])
 
 	useEffect(() => {
-		if (!value) return
-		handleTranslate(value)
-	}, [language.to])
+		if (!toTranslateText) return
+		handleTranslate(toTranslateText)
+	}, [languageConfig.to])
 
 	return (
 		<View className="flex-1 p-4 gap-y-4">
@@ -68,9 +93,9 @@ export function HomeTemplate() {
 				<Typography.Title className="text-sm">{languagesName.from}</Typography.Title>
 				<TextInput
 					placeholder="Type something..."
-					value={value}
+					value={toTranslateText}
 					onChangeText={(t) => {
-						setValue(t)
+						setToTranslateText(t)
 						debounce(async () => await handleTranslate(t), 250)
 					}}
 					placeholderTextColor={colors.neutral[400]}
@@ -79,7 +104,7 @@ export function HomeTemplate() {
 				/>
 				<AudioButton
 					disabled={!translate}
-					onPress={() => handleListen(value, language.from)}
+					onPress={() => handleListenPronunciation(toTranslateText, languageConfig.from)}
 					accessibilityLabel="Listen to pronunciation"
 					className="self-end"
 				/>
@@ -89,14 +114,14 @@ export function HomeTemplate() {
 				<TextInput
 					placeholder="Translation..."
 					readOnly
-					value={translated}
+					value={translateResult}
 					placeholderTextColor={colors.neutral[400]}
 					className="text-lg font-subtitle my-4 text-emerald-300"
 					multiline
 				/>
 				<AudioButton
 					disabled={!translate}
-					onPress={() => handleListen(translated, language.to)}
+					onPress={() => handleListenPronunciation(translateResult, languageConfig.to)}
 					accessibilityLabel="Listen to pronunciation"
 					className="self-end"
 				/>
@@ -106,11 +131,11 @@ export function HomeTemplate() {
 					activeLanguage={languagesName.from}
 					handleExpand={() => {
 						setAction('from')
-						languageRef?.current?.expand()
+						handleOpenSheetLanguage()
 					}}
 				/>
 				<TouchableOpacity
-					onPress={handleAlternate}
+					onPress={handleLanguageAlternate}
 					activeOpacity={0.8}
 					className="bg-neutral-800 rounded-full mx-4 w-12 h-12 items-center justify-center"
 				>
@@ -120,27 +145,14 @@ export function HomeTemplate() {
 					activeLanguage={languagesName.to}
 					handleExpand={() => {
 						setAction('to')
-						languageRef?.current?.expand()
+						handleOpenSheetLanguage()
 					}}
 				/>
 			</View>
 			<LanguageSelect.Root
-				ref={languageRef}
-				language={language[action]}
-				onLanguageChange={(v) => {
-					if (v === language.from || v === language.to) {
-						languageRef?.current?.close()
-						return handleAlternate()
-					}
-					if (action === 'from') {
-						setValue('')
-						setLanguage((prevState) => ({ ...prevState, from: v }))
-					}
-					if (action === 'to') {
-						setLanguage((prevState) => ({ ...prevState, to: v }))
-					}
-					languageRef?.current?.close()
-				}}
+				ref={sheetLanguageSelectRef}
+				language={languageConfig[action]}
+				onLanguageChange={handleSelectedLanguageChange}
 			/>
 		</View>
 	)

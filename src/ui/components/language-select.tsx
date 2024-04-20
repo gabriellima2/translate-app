@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, memo, useCallback } from "react";
 import { TouchableOpacity } from "react-native"
 import { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { Check } from "lucide-react-native"
@@ -30,20 +30,25 @@ export type ItemProps = {
 
 const LANGUAGES_LIST = Object.entries(languages)
 
+
 const Root = forwardRef<BottomSheetRef, LanguageSelectProps>((props, ref) => {
 	const { language, onLanguageChange } = props
+
+	const renderItem = useCallback(({ item }: { item: [string, { name: string }] }) => (
+		<Item
+			label={item[1].name}
+			isActive={item[0] === language}
+			onChange={() => onLanguageChange(item[0] as LanguageCode)}
+		/>
+	), [])
+
 	return (
 		<BottomSheet ref={ref} snapPoints={['75%']} enableDynamicSizing={false}>
 			<BottomSheetFlatList
 				data={LANGUAGES_LIST}
 				keyExtractor={(i) => i[0]}
-				renderItem={({ item }) => (
-					<Item
-						label={item[1].name}
-						isActive={item[0] === language}
-						onChange={() => onLanguageChange(item[0] as LanguageCode)}
-					/>
-				)}
+				renderItem={renderItem}
+				initialNumToRender={12}
 				contentContainerStyle={{ padding: 16 }}
 			/>
 		</BottomSheet>
@@ -51,7 +56,7 @@ const Root = forwardRef<BottomSheetRef, LanguageSelectProps>((props, ref) => {
 })
 
 
-function Item(props: ItemProps) {
+const Item = memo((props: ItemProps) => {
 	const { isActive, label, onChange } = props
 	return (
 		<TouchableOpacity
@@ -66,7 +71,7 @@ function Item(props: ItemProps) {
 			{ isActive && <Check size={20} color={colors.emerald[300]} /> }
 		</TouchableOpacity>
 	)
-}
+})
 
 function Trigger(props: TriggerProps) {
 	const { activeLanguage, handleExpand } = props
