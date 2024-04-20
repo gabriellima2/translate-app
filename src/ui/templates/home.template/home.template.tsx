@@ -3,34 +3,49 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeftRight } from "lucide-react-native";
 import { TextInput, TouchableOpacity, View } from "react-native";
 import colors from "tailwindcss/colors";
-import * as Speech from 'expo-speech';
 import translate from "translate";
 
-import { LanguageSelect } from "../components/language-select";
-import { BottomSheetRef } from "../components/bottom-sheet";
-import { AudioButton } from "../components/audio-button";
-import { Typography } from "../atoms/typography";
+import { LanguageSelect } from "@/ui/components/language-select";
+import { AudioButton } from "@/ui/components/audio-button";
+import { Typography } from "@/ui/atoms/typography";
+
+import { useTranslationForm } from "./hooks/use-translation-form";
+import { useSheetLanguage } from "./hooks/use-sheet-language";
+
+import { makeTranslateAdapter } from "@/adapters/impl/translate.adapter.impl";
+import { makeSpeakAdapter } from "@/adapters/impl/speak.adapter.impl";
 
 import { languages } from "@/constants/languages";
 import type { LanguageCode } from "@/@types/language-code";
 
-type TranslateType = 'from' | 'to'
+type LanguageConfigType = 'from' | 'to'
+type LanguageConfig = { from: LanguageCode, to: LanguageCode }
 
 export function HomeTemplate() {
-	const [toTranslateText, setToTranslateText] = useState('')
-	const [translateResult, setTranslateResult] = useState('')
-	const sheetLanguageSelectRef = useRef<BottomSheetRef>(null)
-	const [languageConfig, setLanguageConfig] = useState<{ from: LanguageCode, to: LanguageCode }>({
-		to: 'pt',
-		from: 'en'
-	})
-	const [action, setAction] = useState<TranslateType>('from')
+	const [languageConfig, setLanguageConfig] = useState<LanguageConfig>({ to: 'pt', from: 'en'})
+	const [changingLanguageConfig, setChangingLanguageConfig] = useState<LanguageConfigType>('from')
+	const {
+		translateResult,
+		toTranslateText,
+		handleToTranslateTextChange,
+		handleTranslateResultChange,
+		clearToTranslateText,
+		clearTranslateResult
+	} = useTranslationForm()
+	const {
+		sheetLanguageRef,
+		handleCloseSheetLanguage,
+		handleOpenSheetLanguage
+	} = useSheetLanguage()
 
 	async function handleTranslate(text: string) {
 		try {
-			if (!text) return setTranslateResult('')
-			const result = await translate(text, { from: languageConfig.from, to: languageConfig.to })
-			setTranslateResult(result)
+			if (!text) return clearToTranslateText()
+			const result = await makeTranslateAdapter().execute(text, {
+				from: languageConfig.from,
+				to: languageConfig.to
+			})
+			handleTranslateResultChange(result)
 		} catch (err) {
 			console.log(err)
 		}
@@ -38,13 +53,13 @@ export function HomeTemplate() {
 
 	function handleListenPronunciation(text: string, language: string) {
 		if (!text) return
-		Speech.speak(text, { language })
+		makeSpeakAdapter().execute(text, language)
 	}
 
 	function handleLanguageAlternate() {
 		setLanguageConfig((prevState) => ({ to: prevState.from, from: prevState.to }))
-		setTranslateResult(toTranslateText)
-		setToTranslateText(translateResult)
+		handleTranslateResultChange(toTranslateText)
+		handleToTranslateTextChange(translateResult)
 	}
 
 	function handleSelectedLanguageChange(language: LanguageCode) {
@@ -54,22 +69,14 @@ export function HomeTemplate() {
 			handleCloseSheetLanguage()
 			return handleLanguageAlternate()
 		}
-		if (action === 'from') {
-			setToTranslateText('')
+		if (changingLanguageConfig === 'from') {
+			clearToTranslateText()
 			setLanguageConfig((prevState) => ({ ...prevState, from: language }))
 		}
-		if (action === 'to') {
+		if (changingLanguageConfig === 'to') {
 			setLanguageConfig((prevState) => ({ ...prevState, to: language }))
 		}
 		handleCloseSheetLanguage()
-	}
-
-	function handleCloseSheetLanguage() {
-		sheetLanguageSelectRef?.current?.close()
-	}
-
-	function handleOpenSheetLanguage() {
-		sheetLanguageSelectRef?.current?.expand()
 	}
 
 	const languagesName = {
@@ -79,7 +86,7 @@ export function HomeTemplate() {
 
 	useEffect(() => {
 		if (toTranslateText) return
-		setTranslateResult('')
+		clearTranslateResult()
 	}, [toTranslateText])
 
 	useEffect(() => {
@@ -90,13 +97,14 @@ export function HomeTemplate() {
 	return (
 		<View className="flex-1 p-4 gap-y-4 justify-between">
 			<View className="gap-y-4">
+				<Typography.Title className="mb-4">Text Translation</Typography.Title>
 				<View className="bg-neutral-800 rounded-3xl min-h-[124px] p-4 justify-between">
 					<Typography.Title className="text-sm">{languagesName.from}</Typography.Title>
 					<TextInput
 						placeholder="Type something..."
 						value={toTranslateText}
 						onChangeText={(t) => {
-							setToTranslateText(t)
+							handleToTranslateTextChange(t)
 							debounce(async () => await handleTranslate(t), 250)
 						}}
 						placeholderTextColor={colors.neutral[400]}
@@ -132,7 +140,7 @@ export function HomeTemplate() {
 				<LanguageSelect.Trigger
 					activeLanguage={languagesName.from}
 					handleExpand={() => {
-						setAction('from')
+						setChangingLanguageConfig('from')
 						handleOpenSheetLanguage()
 					}}
 				/>
@@ -146,14 +154,14 @@ export function HomeTemplate() {
 				<LanguageSelect.Trigger
 					activeLanguage={languagesName.to}
 					handleExpand={() => {
-						setAction('to')
+						setChangingLanguageConfig('to')
 						handleOpenSheetLanguage()
 					}}
 				/>
 			</View>
 			<LanguageSelect.Root
-				ref={sheetLanguageSelectRef}
-				language={languageConfig[action]}
+				ref={sheetLanguageRef}
+				language={languageConfig[changingLanguageConfig]}
 				onLanguageChange={handleSelectedLanguageChange}
 			/>
 		</View>
