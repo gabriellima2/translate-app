@@ -10,6 +10,7 @@ import { AudioButton } from "@/ui/components/audio-button";
 import { Typography } from "@/ui/atoms/typography";
 
 import { useTranslationForm } from "./hooks/use-translation-form";
+import { useVisualFeedback } from "./hooks/use-visual-feedback";
 import { useSheetLanguage } from "./hooks/use-sheet-language";
 
 import { makeTranslateAdapter } from "@/adapters/impl/translate.adapter.impl";
@@ -37,6 +38,11 @@ export function HomeTemplate() {
 		handleCloseSheetLanguage,
 		handleOpenSheetLanguage
 	} = useSheetLanguage()
+	const {
+		isTranslating,
+		setTranslationHasStarted,
+		setTranslationHasFinished,
+	} = useVisualFeedback()
 
 	async function handleTranslate(text: string) {
 		try {
@@ -48,6 +54,8 @@ export function HomeTemplate() {
 			handleTranslateResultChange(result)
 		} catch (err) {
 			console.log(err)
+		} finally {
+			setTranslationHasFinished()
 		}
 	}
 
@@ -105,14 +113,15 @@ export function HomeTemplate() {
 						value={toTranslateText}
 						onChangeText={(t) => {
 							handleToTranslateTextChange(t)
-							debounce(async () => await handleTranslate(t), 250)
+							setTranslationHasStarted()
+							debounce(async () => await handleTranslate(t), 300)
 						}}
 						placeholderTextColor={colors.neutral[400]}
 						className="text-white text-lg font-subtitle my-4"
 						multiline
 					/>
 					<AudioButton
-						disabled={!translate}
+						disabled={!toTranslateText}
 						onPress={() => handleListenPronunciation(toTranslateText, languageConfig.from)}
 						accessibilityLabel="Listen to pronunciation"
 						className="self-end"
@@ -121,9 +130,9 @@ export function HomeTemplate() {
 					<View className="bg-neutral-800 rounded-3xl min-h-[124px] p-4 justify-between">
 						<Typography.Title className="text-sm text-emerald-300">{languagesName.to}</Typography.Title>
 						<TextInput
-							placeholder="Translation..."
+							placeholder={isTranslating ? '...' : 'Translation...'}
 							readOnly
-							value={translateResult}
+							value={isTranslating ? `${translateResult}...` : translateResult}
 							placeholderTextColor={colors.neutral[400]}
 							className="text-lg font-subtitle my-4 text-emerald-300"
 							multiline
