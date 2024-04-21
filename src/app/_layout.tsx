@@ -12,6 +12,10 @@ import {
 
 import { STATUS_BAR_HEIGHT } from '@/constants/status-bar-height'
 
+export const unstable_settings = {
+  initialRouteName: 'index',
+};
+
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
