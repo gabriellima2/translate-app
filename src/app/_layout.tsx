@@ -31,7 +31,7 @@ export default function RootLayout() {
     }
   }, [loaded])
 
-  if (!loaded)  return null
+  if (!loaded) return null
 
 	return (
 		<GestureHandlerRootView className='flex-1'>
@@ -39,9 +39,7 @@ export default function RootLayout() {
 				className="flex-1 bg-neutral-950"
 				style={{ paddingTop: Number(STATUS_BAR_HEIGHT ?? 44) }}
 			>
-				<Stack screenOptions={{ contentStyle: { flex: 1, backgroundColor: "transparent" }}}>
-					<Stack.Screen name="index" options={{ headerShown: false }} />
-				</Stack>
+				<Stack screenOptions={{ contentStyle: { flex: 1, backgroundColor: "transparent" }}} />
 			</SafeAreaView>
 		</GestureHandlerRootView>
   )
