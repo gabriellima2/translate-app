@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { Keyboard } from "react-native"
 
 export function useSheetLanguage() {
 	const [isOpen, setIsOpen] = useState(false)
@@ -8,6 +9,7 @@ export function useSheetLanguage() {
 	}
 
 	function handleOpenSheetLanguage() {
+		Keyboard.dismiss()
 		setIsOpen(true)
 	}
 
