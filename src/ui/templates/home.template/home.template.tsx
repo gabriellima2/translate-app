@@ -1,5 +1,5 @@
 import { debounce } from "@/helpers/debounce";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeftRight } from "lucide-react-native";
 import { TextInput, TouchableOpacity, View } from "react-native";
 import colors from "tailwindcss/colors";
@@ -33,7 +33,7 @@ export function HomeTemplate() {
 		clearTranslateResult
 	} = useTranslationForm()
 	const {
-		sheetLanguageRef,
+		isOpenSheetLanguage,
 		handleCloseSheetLanguage,
 		handleOpenSheetLanguage
 	} = useSheetLanguage()
@@ -159,11 +159,13 @@ export function HomeTemplate() {
 					}}
 				/>
 			</View>
-			<LanguageSelect.Root
-				ref={sheetLanguageRef}
-				language={languageConfig[changingLanguageConfig]}
-				onLanguageChange={handleSelectedLanguageChange}
-			/>
+			{isOpenSheetLanguage && (
+				<LanguageSelect.Root
+					language={languageConfig[changingLanguageConfig]}
+					onLanguageChange={handleSelectedLanguageChange}
+					onClose={handleCloseSheetLanguage}
+				/>
+			)}
 		</View>
 	)
 }

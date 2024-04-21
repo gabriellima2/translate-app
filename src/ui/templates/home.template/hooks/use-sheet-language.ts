@@ -1,19 +1,18 @@
-import { useRef } from "react"
-import { BottomSheetRef } from "@/ui/components/bottom-sheet"
+import { useState } from "react"
 
 export function useSheetLanguage() {
-	const ref = useRef<BottomSheetRef>(null)
+	const [isOpen, setIsOpen] = useState(false)
 
 	function handleCloseSheetLanguage() {
-		ref?.current?.close()
+		setIsOpen(false)
 	}
 
 	function handleOpenSheetLanguage() {
-		ref?.current?.expand()
+		setIsOpen(true)
 	}
 
 	return {
-		sheetLanguageRef: ref,
+		isOpenSheetLanguage: isOpen,
 		handleCloseSheetLanguage,
 		handleOpenSheetLanguage
 	 }

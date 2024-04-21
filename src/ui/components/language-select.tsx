@@ -14,6 +14,7 @@ import type { LanguageCode } from "@/@types/language-code";
 
 export type LanguageSelectProps = {
 	language: string
+	onClose: () => void
 	onLanguageChange: (language: LanguageCode) => void
 }
 
@@ -32,7 +33,7 @@ const LANGUAGES_LIST = Object.entries(languages)
 
 
 const Root = forwardRef<BottomSheetRef, LanguageSelectProps>((props, ref) => {
-	const { language, onLanguageChange } = props
+	const { language, onClose, onLanguageChange } = props
 
 	const renderItem = useCallback(({ item }: { item: [string, { name: string }] }) => (
 		<Item
@@ -43,7 +44,12 @@ const Root = forwardRef<BottomSheetRef, LanguageSelectProps>((props, ref) => {
 	), [])
 
 	return (
-		<BottomSheet ref={ref} snapPoints={['75%']} enableDynamicSizing={false}>
+		<BottomSheet
+			ref={ref}
+			snapPoints={['75%']}
+			enableDynamicSizing={false}
+			onClose={onClose}
+		>
 			<BottomSheetFlatList
 				data={LANGUAGES_LIST}
 				keyExtractor={(i) => i[0]}
